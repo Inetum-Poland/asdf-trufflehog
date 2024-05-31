@@ -65,58 +65,54 @@ list_all_versions() {
 # trufflehog_3.77.0_linux_arm64.tar.gz
 download_release() {
 	local url
-	local version="$1"
 	local release_file="${TOOL_NAME}_${ASDF_INSTALL_VERSION}_${platform}_${architecture}.tar.gz"
-	local checksum_release_file="${TOOL_NAME}_${version}_checksums.txt"
+	local checksum_release_file="${TOOL_NAME}_${ASDF_INSTALL_VERSION}_checksums.txt"
+
+	mkdir -p "${ASDF_DOWNLOAD_PATH}"
 
 	# /releases/download/v3.77.0/trufflehog_3.77.0_darwin_arm64.tar.gz
-	url="${GH_REPO}/releases/download/v${version}/${release_file}"
-	echo "* Downloading ${TOOL_NAME} release ${version}..."
+	url="${GH_REPO}/releases/download/v${ASDF_INSTALL_VERSION}/${release_file}"
+	echo "* Downloading ${TOOL_NAME} release ${ASDF_INSTALL_VERSION}..."
 	curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${release_file}" -C - "$url" || fail "Could not download ${url}"
 
 	if command -v sha256sum; then
 		# /releases/download/v3.77.0/trufflehog_3.77.0_checksums.txt
-		sha_url="${GH_REPO}/releases/download/v${version}/${checksum_release_file}"
-		echo "* Downloading ${TOOL_NAME} release checksum ${version}..."
+		sha_url="${GH_REPO}/releases/download/v${ASDF_INSTALL_VERSION}/${checksum_release_file}"
+		echo "* Downloading ${TOOL_NAME} release checksum ${ASDF_INSTALL_VERSION}..."
 		curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${checksum_release_file}" -C - "${sha_url}" || fail "Could not download ${sha_url}"
 
-		pushd "${ASDF_DOWNLOAD_PATH}"
+		pushd "${ASDF_DOWNLOAD_PATH}" > /dev/null
 		grep "${release_file}" "${checksum_release_file}" | sha256sum -c || fail "Could not verify checksum for $release_file"
 		rm "${checksum_release_file}"
-		popd
+		popd > /dev/null
 	fi
 }
 
 unpack_release() {
-	local install_path="$1"
 	local release_file="${TOOL_NAME}_${ASDF_INSTALL_VERSION}_${platform}_${architecture}.tar.gz"
 
-	tar -xzf "${ASDF_DOWNLOAD_PATH}/${release_file}" -C "${install_path}" --strip-components=0 || fail "Could not extract ${release_file}"
+	tar -xzf "${ASDF_DOWNLOAD_PATH}/${release_file}" -C "${ASDF_DOWNLOAD_PATH}" --strip-components=0 || fail "Could not extract ${release_file}"
 
 	# Remove the tar.gz file since we don't need to keep it
 	rm "${ASDF_DOWNLOAD_PATH}/${release_file}"
 }
 
 install_version() {
-	local install_type="$1"
-	local version="$2"
-	local install_path="${3%/bin}/bin"
-
-	if [ "$install_type" != "version" ]; then
+	if [ "${ASDF_INSTALL_TYPE}" != "version" ]; then
 		fail "asdf-$TOOL_NAME supports release installs only"
 	fi
 
 	(
-		mkdir -p "$install_path"
-		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+		mkdir -p "${ASDF_INSTALL_PATH%/bin}/bin"
+		cp -r "${ASDF_DOWNLOAD_PATH}/${TOOL_NAME}" "${ASDF_INSTALL_PATH%/bin}/bin"
 
 		local tool_cmd
-		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
-		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
+		tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
+		test -x "${ASDF_INSTALL_PATH%/bin}/bin/$tool_cmd" || fail "Expected ${ASDF_INSTALL_PATH%/bin}/bin/${tool_cmd} to be executable."
 
-		echo "$TOOL_NAME $version installation was successful!"
+		echo "${TOOL_NAME} ${ASDF_INSTALL_VERSION} installation was successful!"
 	) || (
-		rm -rf "$install_path"
-		fail "An error occurred while installing $TOOL_NAME $version."
+		rm -rf "${ASDF_INSTALL_PATH%/bin}/bin"
+		fail "An error occurred while installing ${TOOL_NAME} ${ASDF_INSTALL_VERSION}."
 	)
 }
