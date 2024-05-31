@@ -18,7 +18,6 @@
 # Dependencies
 
 - `curl`
-- `go`
 
 # Install
 
@@ -56,4 +55,4 @@ Contributions of any kind welcome! See the [contributing guide](contributing.md)
 
 # License
 
-See [LICENSE](LICENSE) © [Aam](https://github.com/inetum-poland/)
+See [LICENSE](LICENSE) (C) [Inetum Poland](https://github.com/inetum-poland/)
