@@ -19,8 +19,8 @@ if [ -n "${GITHUB_API_TOKEN:-}" ]; then
 fi
 
 platform=""
-_platform="$(uname -s)"
-case "${_platform,,}" in
+_platform="echo $(uname -s) | tr "[:upper:]" "[:lower:]"
+case "${_platform}" in
 	darwin*) platform="darwin" ;;
 	linux*) platform="linux" ;;
 	# freebsd*) platform="freebsd" ;;
@@ -30,8 +30,8 @@ case "${_platform,,}" in
 esac
 
 architecture=""
-_architecture="$(uname -m)"
-case "${_architecture,,}" in
+_architecture="echo $(uname -m) | tr "[:upper:]" "[:lower:]"
+case "${_architecture}" in
 	aarch64* | arm64) architecture="arm64" ;;
 	x86_64*) architecture="amd64" ;;
 	# armv5* | armv6* | armv7*) architecture="arm" ;;
