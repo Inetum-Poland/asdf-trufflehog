@@ -21,26 +21,26 @@ fi
 
 platform=""
 case "$(uname -s)" in
-	darwin*) platform="darwin" ;;
-	linux*) platform="linux" ;;
-	# freebsd*) platform="freebsd" ;;
-	# netbsd*) platform="netbsd" ;;
-	# openbsd*) platform="openbsd" ;;
-	*) fail "Unsupported platform" ;;
+darwin*) platform="darwin" ;;
+linux*) platform="linux" ;;
+# freebsd*) platform="freebsd" ;;
+# netbsd*) platform="netbsd" ;;
+# openbsd*) platform="openbsd" ;;
+*) fail "Unsupported platform" ;;
 esac
 
 architecture=""
 case "$(uname -m)" in
-	aarch64* | arm64) architecture="arm64" ;;
-	x86_64*) architecture="amd64" ;;
-	# armv5* | armv6* | armv7*) architecture="arm" ;;
-	# i686*) architecture="386" ;;
-	# ppc64le*) architecture="ppc64le" ;;
-	# ppc64*) architecture="ppc64" ;;
-	# ppc*) architecture="ppc" ;;
-	# mipsel*) architecture="mipsle" ;;
-	# mips*) architecture="mips" ;;
-	*) fail "Unsupported architecture" ;;
+aarch64* | arm64) architecture="arm64" ;;
+x86_64*) architecture="amd64" ;;
+# armv5* | armv6* | armv7*) architecture="arm" ;;
+# i686*) architecture="386" ;;
+# ppc64le*) architecture="ppc64le" ;;
+# ppc64*) architecture="ppc64" ;;
+# ppc*) architecture="ppc" ;;
+# mipsel*) architecture="mipsle" ;;
+# mips*) architecture="mips" ;;
+*) fail "Unsupported architecture" ;;
 esac
 
 sort_versions() {
@@ -81,10 +81,10 @@ download_release() {
 		echo "* Downloading ${TOOL_NAME} release checksum ${ASDF_INSTALL_VERSION}..."
 		curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${checksum_release_file}" -C - "${sha_url}" || fail "Could not download ${sha_url}"
 
-		pushd "${ASDF_DOWNLOAD_PATH}" > /dev/null
+		pushd "${ASDF_DOWNLOAD_PATH}" >/dev/null
 		grep "${release_file}" "${checksum_release_file}" | sha256sum -c || fail "Could not verify checksum for $release_file"
 		rm "${checksum_release_file}"
-		popd > /dev/null
+		popd >/dev/null
 	fi
 }
 
@@ -112,7 +112,7 @@ install_version() {
 
 		echo "${TOOL_NAME} ${ASDF_INSTALL_VERSION} installation was successful!"
 	) || (
-		rm -rf "${ASDF_INSTALL_PATH%/bin}/bin"
+		rm -rf "${ASDF_INSTALL_PATH%/bin:?}/bin"
 		fail "An error occurred while installing ${TOOL_NAME} ${ASDF_INSTALL_VERSION}."
 	)
 }
