@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
+shopt -s nocasematch
 
 GH_REPO="https://github.com/trufflesecurity/trufflehog"
 TOOL_NAME="trufflehog"
@@ -19,8 +20,7 @@ if [ -n "${GITHUB_API_TOKEN:-}" ]; then
 fi
 
 platform=""
-_platform="echo $(uname -s) | tr "[:upper:]" "[:lower:]""
-case "${_platform}" in
+case "$(uname -s)" in
 	darwin*) platform="darwin" ;;
 	linux*) platform="linux" ;;
 	# freebsd*) platform="freebsd" ;;
@@ -30,8 +30,7 @@ case "${_platform}" in
 esac
 
 architecture=""
-_architecture="echo $(uname -m) | tr "[:upper:]" "[:lower:]""
-case "${_architecture}" in
+case "$(uname -m)" in
 	aarch64* | arm64) architecture="arm64" ;;
 	x86_64*) architecture="amd64" ;;
 	# armv5* | armv6* | armv7*) architecture="arm" ;;
