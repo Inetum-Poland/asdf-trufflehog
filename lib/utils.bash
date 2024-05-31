@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -Eeuo pipefail
 
 GH_REPO="https://github.com/trufflesecurity/trufflehog"
 TOOL_NAME="trufflehog"
@@ -34,17 +34,53 @@ list_all_versions() {
 	list_github_tags
 }
 
+# trufflehog_3.77.0_darwin_amd64.tar.gz
+# trufflehog_3.77.0_darwin_arm64.tar.gz
+# trufflehog_3.77.0_linux_amd64.tar.gz
+# trufflehog_3.77.0_linux_arm64.tar.gz
 download_release() {
 	local version filename url
 	version="$1"
 	filename="$2"
-	platform="$(uname -s)_$(uname -m)"
+
+	local platform
+
+  case "${(uname -s),,}" in
+    darwin*) platform="darwin" ;;
+    linux*) platform="linux" ;;
+    # freebsd*) platform="freebsd" ;;
+    # netbsd*) platform="netbsd" ;;
+    # openbsd*) platform="openbsd" ;;
+    *) fail "Unsupported platform" ;;
+  esac
+
+  local architecture
+
+  case "${(uname -m),,}" in
+    aarch64* | arm64) architecture="arm64" ;;
+    x86_64*) architecture="amd64" ;;
+    # armv5* | armv6* | armv7*) architecture="arm" ;;
+    # i686*) architecture="386" ;;
+    # ppc64le*) architecture="ppc64le" ;;
+    # ppc64*) architecture="ppc64" ;;
+    # ppc*) architecture="ppc" ;;
+    # mipsel*) architecture="mipsle" ;;
+    # mips*) architecture="mips" ;;
+    *) fail "Unsupported architecture" ;;
+  esac
 
 	# /releases/download/v3.77.0/trufflehog_3.77.0_darwin_arm64.tar.gz
-	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${version}_${platform}.tar.gz"
+	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${version}_${platform}_${architecture}.tar.gz"
+	# /releases/download/v3.77.0/trufflehog_3.77.0_checksums.txt
+	sha_url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${version}_checksums.txt"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+
+	echo "* Downloading $TOOL_NAME release checksum $version..."
+	curl "${curl_opts[@]}" -o "$filename.sha256" -C - "$sha_url" || fail "Could not download $sha_url"
+
+	sha256sum -c "$filename.sha256" || fail "Could not verify checksum for $filename"
 }
 
 install_version() {
