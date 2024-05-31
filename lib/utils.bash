@@ -38,8 +38,10 @@ download_release() {
 	local version filename url
 	version="$1"
 	filename="$2"
+	platform="$(uname -s)_$(uname -m)"
 
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	# /releases/download/v3.77.0/trufflehog_3.77.0_darwin_arm64.tar.gz
+	url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${version}_${platform}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -64,7 +66,7 @@ install_version() {
 
 		echo "$TOOL_NAME $version installation was successful!"
 	) || (
-		rm -rf "$install_path"
+		# rm -rf "$install_path"
 		fail "An error occurred while installing $TOOL_NAME $version."
 	)
 }
