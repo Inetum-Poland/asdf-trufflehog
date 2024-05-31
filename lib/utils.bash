@@ -7,6 +7,9 @@ GH_REPO="https://github.com/trufflesecurity/trufflehog"
 TOOL_NAME="trufflehog"
 TOOL_TEST="trufflehog --version"
 
+# PS4='+ ${BASH_SOURCE}:${LINENO}:(${FUNCNAME[0]:+${FUNCNAME[0]}(): }) '
+# set -x
+
 fail() {
 	echo -e "asdf-$TOOL_NAME: $*"
 	exit 1
@@ -57,6 +60,25 @@ list_github_tags() {
 list_all_versions() {
 	# Change this function if trufflehog has other means of determining installable versions.
 	list_github_tags
+}
+
+show_latest_version() {
+	# curl of REPO/releases/latest is expected to be a 302 to another URL
+	# when no releases redirect_url="REPO/releases"
+	# when there are releases redirect_url="REPO/releases/tag/v<VERSION>"
+	curl_opts=(-sI)
+	redirect_url=$(curl "${curl_opts[@]}" "$GH_REPO/releases/latest" | sed -n -e "s|^location: *||p" | sed -n -e "s|\r||p")
+	version=
+
+	printf "redirect url: %s\n" "$redirect_url" >&2
+
+	if [[ "$redirect_url" == "$GH_REPO/releases" ]]; then
+		version="$(list_all_versions | sort_versions | tail -n1 | xargs echo)"
+	else
+		version="$(printf "%s\n" "$redirect_url" | sed 's|.*/tag/v\{0,1\}||')"
+	fi
+
+	printf "%s\n" "$version"
 }
 
 # trufflehog_3.77.0_darwin_amd64.tar.gz
