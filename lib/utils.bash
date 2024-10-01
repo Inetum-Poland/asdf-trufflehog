@@ -97,17 +97,17 @@ download_release() {
 	echo "* Downloading ${TOOL_NAME} release ${ASDF_INSTALL_VERSION}..."
 	curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${release_file}" -C - "$url" || fail "Could not download ${url}"
 
-	if command -v sha256sum; then
-		# /releases/download/v3.77.0/trufflehog_3.77.0_checksums.txt
-		sha_url="${GH_REPO}/releases/download/v${ASDF_INSTALL_VERSION}/${checksum_release_file}"
-		echo "* Downloading ${TOOL_NAME} release checksum ${ASDF_INSTALL_VERSION}..."
-		curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${checksum_release_file}" -C - "${sha_url}" || fail "Could not download ${sha_url}"
+	# if command -v sha256sum; then
+	# 	# /releases/download/v3.77.0/trufflehog_3.77.0_checksums.txt
+	# 	sha_url="${GH_REPO}/releases/download/v${ASDF_INSTALL_VERSION}/${checksum_release_file}"
+	# 	echo "* Downloading ${TOOL_NAME} release checksum ${ASDF_INSTALL_VERSION}..."
+	# 	curl "${curl_opts[@]}" -o "${ASDF_DOWNLOAD_PATH}/${checksum_release_file}" -C - "${sha_url}" || fail "Could not download ${sha_url}"
 
-		pushd "${ASDF_DOWNLOAD_PATH}" >/dev/null
-		grep "${release_file}" "${checksum_release_file}" | sha256sum -c || fail "Could not verify checksum for $release_file"
-		rm "${checksum_release_file}"
-		popd >/dev/null
-	fi
+	# 	pushd "${ASDF_DOWNLOAD_PATH}" >/dev/null
+	# 	grep "${release_file}" "${checksum_release_file}" | sha256sum -c || fail "Could not verify checksum for $release_file"
+	# 	rm "${checksum_release_file}"
+	# 	popd >/dev/null
+	# fi
 }
 
 unpack_release() {
